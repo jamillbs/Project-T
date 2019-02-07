@@ -9,8 +9,8 @@ public class Character : MonoBehaviour {
     public float jumpForce;
     public bool isGrounded;
     public LayerMask isGroundLayer;
-    public Transform groundCheck;
-    public float groundCheckRadius;
+    //public Transform groundCheck;
+    //public float groundCheckRadius;
     private float inputX;
 
     Animator anim;
@@ -37,20 +37,20 @@ public class Character : MonoBehaviour {
 
         if (jumpForce <= 0)
         {
-            jumpForce = 15.0f;
+            jumpForce = 13.0f;
             Debug.Log("JumpForce not set. Defaulting to " + jumpForce);
         }
 
-        if (!groundCheck)
-        {
-            Debug.Log("No GroundCheck found.");
-        }
+        //if (!groundCheck)
+        //{
+        //    Debug.Log("No GroundCheck found.");
+        //}
 
-        if (groundCheckRadius <= 0)
-        {
-            groundCheckRadius = 0.1f;
-            Debug.Log("GroundCheckRadius not set. Defaulting to " + groundCheckRadius);
-        }
+        //if (groundCheckRadius <= 0)
+        //{
+        //    groundCheckRadius = 0.1f;
+        //    Debug.Log("GroundCheckRadius not set. Defaulting to " + groundCheckRadius);
+        //}
 
         anim = GetComponent<Animator>();
         if (!anim)
@@ -61,12 +61,20 @@ public class Character : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        inputX = Input.GetAxis("Horizontal");
+
+        // Swap direction of sprite depending on walk direction
+        if (inputX > 0)
+            transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+
+        else if (inputX < 0)
+            transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+
+        rb.velocity = new Vector2(inputX * speed, rb.velocity.y);
+
         isGrounded = IsGrounded();
         anim.SetBool("Grounded", isGrounded);
-
-        float moveValue = Input.GetAxisRaw("Horizontal");
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position,
-            groundCheckRadius, isGroundLayer);
 
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -84,7 +92,8 @@ public class Character : MonoBehaviour {
         else if (Mathf.Abs(inputX) > Mathf.Epsilon && isGrounded)
             anim.SetInteger("AnimState", 2);
 
-        rb.velocity = new Vector2(moveValue * speed, rb.velocity.y);
+        else
+            anim.SetInteger("AnimState", 0);
 
         //anim.SetFloat("MoveSpeed", Mathf.Abs(moveValue));
 
